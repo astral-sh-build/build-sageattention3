@@ -1,0 +1,96 @@
+diff --git a/sageattention3_blackwell/setup.py b/sageattention3_blackwell/setup.py
+index 98f2f05..5c75585 100644
+--- a/sageattention3_blackwell/setup.py
++++ b/sageattention3_blackwell/setup.py
+@@ -55,19 +55,63 @@ if not SKIP_CUDA_BUILD:
+     TORCH_MAJOR = int(torch.__version__.split(".")[0])
+     TORCH_MINOR = int(torch.__version__.split(".")[1])
+ 
+-    cc_flag = []
+     _, bare_metal_version = get_cuda_bare_metal_version(CUDA_HOME)
+     if bare_metal_version < Version("12.8"):
+         raise RuntimeError("Sage3 is only supported on CUDA 12.8 and above")
+-    cc_major, cc_minor = torch.cuda.get_device_capability()
+-    if (cc_major, cc_minor) == (10, 0):  # sm_100
+-        cc_flag.append("-gencode")
+-        cc_flag.append("arch=compute_100a,code=sm_100a")
+-    elif (cc_major, cc_minor) == (12, 0):  # sm_120
+-        cc_flag.append("-gencode")
+-        cc_flag.append("arch=compute_120a,code=sm_120a")
+-    else:
+-        raise RuntimeError("Unsupported GPU")
++
++    # Determine target compute capabilities
++    compute_capabilities = set()
++
++    # Prefer TORCH_CUDA_ARCH_LIST if explicitly specified (works without GPUs)
++    arch_list_env = os.getenv("TORCH_CUDA_ARCH_LIST", "").strip()
++    if arch_list_env:
++        for item in arch_list_env.replace(",", ";").split(";"):
++            it = item.strip()
++            if not it:
++                continue
++            it = it.lower().replace("sm_", "").replace("compute_", "")
++            it = it.replace("a", "")
++            if it.endswith("+ptx"):
++                it = it[:-4]
++
++            # Convert to major.minor format
++            if len(it) == 2 and it.isdigit():
++                compute_capabilities.add(f"{it[0]}.{it[1]}")
++            elif len(it) == 3 and it.isdigit():
++                compute_capabilities.add(f"{it[:2]}.{it[2]}")
++            elif "." in it:
++                compute_capabilities.add(it)
++
++    # If not provided, try to detect from local GPUs
++    if not compute_capabilities:
++        if torch.cuda.is_available():
++            device_count = torch.cuda.device_count()
++            for i in range(device_count):
++                cc_major, cc_minor = torch.cuda.get_device_capability(i)
++                compute_capabilities.add(f"{cc_major}.{cc_minor}")
++        else:
++            raise RuntimeError(
++                "No TORCH_CUDA_ARCH_LIST set and no CUDA device available. "
++                "Set TORCH_CUDA_ARCH_LIST to build without a GPU."
++            )
++
++    if not compute_capabilities:
++        raise RuntimeError("No target compute capabilities found")
++
++    print(f"Target compute capabilities: {compute_capabilities}")
++
++    # Build gencode flags for each compute capability
++    cc_flag = []
++    for capability in compute_capabilities:
++        if capability.startswith("10.0"):
++            cc_flag.extend(["-gencode", "arch=compute_100a,code=sm_100a"])
++        elif capability.startswith("12.0"):
++            cc_flag.extend(["-gencode", "arch=compute_120a,code=sm_120a"])
++        else:
++            raise RuntimeError(f"Unsupported GPU compute capability {capability}")
++
++    if not cc_flag:
++        raise RuntimeError("No supported compute capabilities found (need 10.0 or 12.0)")
+ 
+     # HACK: The compiler flag -D_GLIBCXX_USE_CXX11_ABI is set to be the same as
+     # torch._C._GLIBCXX_USE_CXX11_ABI
+@@ -122,8 +166,6 @@ if not SKIP_CUDA_BUILD:
+                 ),
+             },
+             include_dirs=include_dirs,
+-            # Without this we get and error about cuTensorMapEncodeTiled not defined
+-            libraries=["cuda"]
+         )
+     )
+     ext_modules.append(
+@@ -137,8 +179,6 @@ if not SKIP_CUDA_BUILD:
+                 ),
+             },
+             include_dirs=include_dirs,
+-            # Without this we get and error about cuTensorMapEncodeTiled not defined
+-            libraries=["cuda"]
+         )
+     )
+ 

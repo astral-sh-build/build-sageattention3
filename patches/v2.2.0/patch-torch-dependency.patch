@@ -1,0 +1,23 @@
+diff --git a/sageattention3_blackwell/setup.py b/sageattention3_blackwell/setup.py
+index 98f2f05..65a41cc 100644
+--- a/sageattention3_blackwell/setup.py
++++ b/sageattention3_blackwell/setup.py
+@@ -148,6 +148,9 @@ class CachedWheelsCommand(_bdist_wheel):
+     def run(self):
+         super().run()
+ 
++TORCH_MAJOR = int(torch.__version__.split(".")[0])
++TORCH_MINOR = int(torch.__version__.split(".")[1])
++
+ setup(
+     name=PACKAGE_NAME,
+     version="1.0.0",
+@@ -176,7 +179,7 @@ setup(
+     },
+     python_requires=">=3.8",
+     install_requires=[
+-        "torch",
++        f"torch=={TORCH_MAJOR}.{TORCH_MINOR}.*",
+         "einops",
+         "packaging",
+         "ninja",
