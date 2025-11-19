@@ -86,20 +86,6 @@ jobs:
           ref: ${{ steps.sageattention3-version.outputs.version }}
           persist-credentials: false
 
-      - name: Move to sageattention3_blackwell subdirectory
-        run: |
-          if [ -d "sageattention3_blackwell" ]; then
-            cd sageattention3_blackwell
-            # Move contents to parent directory
-            shopt -s dotglob
-            mv * ../ 2>/dev/null || true
-            cd ..
-            rmdir sageattention3_blackwell
-          else
-            echo "Error: sageattention3_blackwell subdirectory not found"
-            exit 1
-          fi
-
       - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
         with:
           python-version: "3.13"
@@ -134,7 +120,7 @@ jobs:
 
       - name: Build wheels for SageAttention3 ${{ matrix.torch-version }}+cu${{ matrix.cuda-version }}
         run: |
-          .venv/bin/cibuildwheel --output-dir dist
+          .venv/bin/cibuildwheel ./sageattention3_blackwell --output-dir dist
         env:
           CIBW_ARCHS_LINUX: ${{ matrix.target-arch }}
           CIBW_BUILD: cp${{ env.MATRIX_PYTHON_VERSION }}-*64
