@@ -1,5 +1,5 @@
 diff --git a/sageattention3_blackwell/setup.py b/sageattention3_blackwell/setup.py
-index 98f2f05..f80e36e 100644
+index 98f2f05..5c75585 100644
 --- a/sageattention3_blackwell/setup.py
 +++ b/sageattention3_blackwell/setup.py
 @@ -55,19 +55,63 @@ if not SKIP_CUDA_BUILD:
@@ -76,3 +76,21 @@ index 98f2f05..f80e36e 100644
  
      # HACK: The compiler flag -D_GLIBCXX_USE_CXX11_ABI is set to be the same as
      # torch._C._GLIBCXX_USE_CXX11_ABI
+@@ -122,8 +166,6 @@ if not SKIP_CUDA_BUILD:
+                 ),
+             },
+             include_dirs=include_dirs,
+-            # Without this we get and error about cuTensorMapEncodeTiled not defined
+-            libraries=["cuda"]
+         )
+     )
+     ext_modules.append(
+@@ -137,8 +179,6 @@ if not SKIP_CUDA_BUILD:
+                 ),
+             },
+             include_dirs=include_dirs,
+-            # Without this we get and error about cuTensorMapEncodeTiled not defined
+-            libraries=["cuda"]
+         )
+     )
+ 
