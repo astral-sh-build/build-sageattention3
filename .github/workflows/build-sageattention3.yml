@@ -129,7 +129,7 @@ jobs:
           CIBW_BEFORE_ALL: >
             curl -LsSf https://astral.sh/uv/install.sh | sh
           CIBW_BEFORE_BUILD_LINUX: >
-            uv pip install "setuptools>=62,<75" "wheel>=0.38,<0.44" "packaging>=21,<24" &&
+            uv pip install setuptools wheel packaging &&
             uv pip install --no-cache-dir torch==${{ matrix.torch-version }} --index-url https://download.pytorch.org/whl/cu${MATRIX_CUDA_VERSION} &&
             bash build_scripts/prepare_for_build.sh ${{ steps.sageattention3-version.outputs.version }}
           CIBW_ENVIRONMENT: >
