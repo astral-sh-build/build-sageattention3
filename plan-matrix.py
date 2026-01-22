@@ -16,10 +16,8 @@ MIN_CUDA_VERSION = "12.8"
 # The architectures to build against.
 # SageAttention3 requires PyTorch >= 2.7 (for CUDA 12.8 support)
 ARCH_TORCH_PAIRS = {
-    # "x86_64": ["2.7.1", "2.8.0", "2.9.0"],
-    # "aarch64": ["2.7.1", "2.8.0", "2.9.0"],
-    "x86_64": ["2.10.0"],
-    "aarch64": ["2.10.0"],
+    "x86_64": ["2.7.1", "2.8.0", "2.9.0", "2.10.0"],
+    "aarch64": ["2.7.1", "2.8.0", "2.9.0", "2.10.0"],
 }
 
 # Supported Python versions for each PyTorch version.
