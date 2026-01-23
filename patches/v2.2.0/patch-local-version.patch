@@ -7,7 +7,7 @@ index 98f2f05..ddfa4c7 100644
          super().run()
  
 +# Auto-generate local version from CUDA and PyTorch versions.
-+version = "1.0.0"
++version = "2.2.0"
 +if torch.version.cuda:
 +    version = f"{version}+cu.{torch.version.cuda}.torch.{TORCH_MAJOR}.{TORCH_MINOR}"
 +
