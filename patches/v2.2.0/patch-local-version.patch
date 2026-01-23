@@ -1,12 +1,11 @@
 diff --git a/sageattention3_blackwell/setup.py b/sageattention3_blackwell/setup.py
-index 1234567..abcdefg 100644
+index 98f2f05..ddfa4c7 100644
 --- a/sageattention3_blackwell/setup.py
 +++ b/sageattention3_blackwell/setup.py
-@@ -150,9 +150,14 @@ class CachedWheelsCommand(_bdist_wheel):
-
- TORCH_MAJOR = int(torch.__version__.split(".")[0])
- TORCH_MINOR = int(torch.__version__.split(".")[1])
-
+@@ -148,9 +148,14 @@ class CachedWheelsCommand(_bdist_wheel):
+     def run(self):
+         super().run()
+ 
 +# Auto-generate local version from CUDA and PyTorch versions.
 +version = "1.0.0"
 +if torch.version.cuda:
@@ -16,5 +15,6 @@ index 1234567..abcdefg 100644
      name=PACKAGE_NAME,
 -    version="1.0.0",
 +    version=version,
-     author='SageAttention team',
-     author_email='jt_zhang@outlook.com',
+     packages=find_packages(
+         exclude=(
+             "build",
