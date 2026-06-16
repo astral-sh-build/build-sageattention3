@@ -1,0 +1,7 @@
+SageAttention3 builds clone CUTLASS during `sageattention3_blackwell/setup.py`
+when `sageattention3_blackwell/csrc/cutlass` is absent. The resulting checkout
+provides CUTLASS headers used to compile the SageAttention3 CUDA extensions.
+
+Project: NVIDIA CUTLASS
+Repository: https://github.com/NVIDIA/cutlass
+Build-time path: sageattention3_blackwell/csrc/cutlass
