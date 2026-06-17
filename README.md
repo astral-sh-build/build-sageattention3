@@ -10,11 +10,11 @@ version. Each wheel has a local version suffix that identifies the CUDA, PyTorch
 was built against, such as `sageattn3==2.2.0+cu12.8torch2.10.0cxx11abiTRUE`, and requires the
 matching PyTorch release. SageAttention3 requires CUDA 12.8 or later and targets Blackwell GPUs.
 
-Pre-built wheels are available on [Astral's GPU indexes](https://wheels.astralshosted.com/index.html).
+Pre-built wheels are available on [Astral's GPU indexes](https://wheels.astralhosted.com/index.html).
 For example, to install a CUDA 12.8 build:
 
 ```console
-$ uv add sageattn3 --index astral-cu128=https://wheels.astralshosted.com/simple/cu128/
+$ uv add sageattn3 --index astral-cu128=https://wheels.astralhosted.com/simple/cu128/
 ```
 
 This configures the index and uses it as the source for `sageattn3`:
@@ -25,13 +25,13 @@ sageattn3 = { index = "astral-cu128" }
 
 [[tool.uv.index]]
 name = "astral-cu128"
-url = "https://wheels.astralshosted.com/simple/cu128/"
+url = "https://wheels.astralhosted.com/simple/cu128/"
 ```
 
 Or, with `uv pip`:
 
 ```console
-$ uv pip install --index https://wheels.astralshosted.com/simple/cu128/ sageattn3
+$ uv pip install --index https://wheels.astralhosted.com/simple/cu128/ sageattn3
 ```
 
 ## Supported versions
