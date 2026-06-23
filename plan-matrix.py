@@ -15,49 +15,35 @@ from packaging.version import Version
 MIN_CUDA_VERSION = "12.8"
 
 # The architectures to build against.
-# SageAttention3 requires PyTorch >= 2.7 (for CUDA 12.8 support)
+# SageAttention3 requires PyTorch >= 2.8.
 ARCH_TORCH_PAIRS = {
-    "x86_64": ["2.7.1", "2.8.0", "2.9.0", "2.10.0", "2.11.0"],
-    "aarch64": ["2.7.1", "2.8.0", "2.9.0", "2.10.0", "2.11.0"],
+    "x86_64": ["2.8.0", "2.9.1", "2.10.0", "2.11.0", "2.12.1"],
+    "aarch64": ["2.8.0", "2.9.1", "2.10.0", "2.11.0", "2.12.1"],
 }
 
 # Supported Python versions for each PyTorch version.
 # See: https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix
 TORCH_PYTHON_SUPPORT = {
-    "2.4": ["3.9", "3.10", "3.11", "3.12"],
-    "2.5": ["3.9", "3.10", "3.11", "3.12"],
-    "2.6": ["3.9", "3.10", "3.11", "3.12"],
-    "2.7": ["3.9", "3.10", "3.11", "3.12", "3.13"],
-    "2.8": ["3.9", "3.10", "3.11", "3.12", "3.13"],
-    "2.9": ["3.10", "3.11", "3.12", "3.13", "3.14"],
-    "2.10": ["3.10", "3.11", "3.12", "3.13", "3.14"],
-    "2.11": ["3.10", "3.11", "3.12", "3.13", "3.14"],
+    "2.8": ["3.13"],
+    "2.9": ["3.13"],
+    "2.10": ["3.13", "3.14"],
+    "2.11": ["3.13", "3.14"],
+    "2.12": ["3.13", "3.14"],
 }
 
 # Minimum and maximum CUDA versions for each PyTorch version.
 # See: https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix
 PYTORCH_CUDA_RANGES: dict[str, tuple[str, str]] = {
-    "2.4": ("11.8", "12.4"),
-    "2.5": ("11.8", "12.4"),
-    "2.6": ("11.8", "12.6"),
-    "2.7": ("11.8", "12.8"),
     "2.8": ("11.8", "12.9"),
     "2.9": ("12.6", "13.0"),
     "2.10": ("12.6", "13.0"),
     "2.11": ("12.6", "13.0"),
+    "2.12": ("12.6", "13.2"),
 }
 
 # Actual CUDA versions to build against for each PyTorch version.
 # SageAttention3 requires CUDA >= 12.8, so we only build for CUDA 12.8+
 PYTORCH_CUDA_VERSIONS: dict[tuple[str, str], list[str]] = {
-    ("2.4", "x86_64"): ["12.1", "12.4"],
-    ("2.4", "aarch64"): ["12.4"],
-    ("2.5", "x86_64"): ["12.1", "12.4"],
-    ("2.5", "aarch64"): ["12.4"],
-    ("2.6", "x86_64"): ["12.4", "12.6"],
-    ("2.6", "aarch64"): ["12.6"],
-    ("2.7", "x86_64"): ["12.6", "12.8"],
-    ("2.7", "aarch64"): ["12.8"],
     ("2.8", "x86_64"): ["12.6", "12.8", "12.9"],
     ("2.8", "aarch64"): ["12.9"],
     ("2.9", "x86_64"): ["12.6", "12.8", "12.9", "13.0"],
@@ -66,12 +52,12 @@ PYTORCH_CUDA_VERSIONS: dict[tuple[str, str], list[str]] = {
     ("2.10", "aarch64"): ["12.6", "12.8", "12.9", "13.0"],
     ("2.11", "x86_64"): ["12.6", "12.8", "12.9", "13.0"],
     ("2.11", "aarch64"): ["12.6", "12.8", "12.9", "13.0"],
+    ("2.12", "x86_64"): ["12.6", "13.0", "13.2"],
+    ("2.12", "aarch64"): ["12.6", "13.0", "13.2"],
 }
 
 # CUDA architectures to build against for each PyTorch version.
 TORCH_CUDA_ARCH_LIST = {
-    # https://github.com/pytorch/pytorch/blob/134179474539648ba7dee1317959529fbd0e7f89/.ci/manywheel/build_cuda.sh#L55
-    ("2.7", "12.8"): "10.0;12.0+PTX",
     # https://github.com/pytorch/pytorch/blob/ba56102387ef21a3b04b357e5b183d48f0afefc7/.ci/manywheel/build_cuda.sh#L56
     ("2.8", "12.8"): "10.0;12.0+PTX",
     ("2.8", "12.9"): "10.0;12.0+PTX",
@@ -85,19 +71,18 @@ TORCH_CUDA_ARCH_LIST = {
     ("2.11", "12.8"): "10.0;12.0+PTX",
     ("2.11", "12.9"): "10.0;12.0+PTX",
     ("2.11", "13.0"): "10.0;12.0+PTX",
+    ("2.12", "13.0"): "10.0;12.0+PTX",
+    ("2.12", "13.2"): "10.0;12.0+PTX",
 }
 
 # The glibc version to use for each PyTorch version, for manylinux builds.
 # See: https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix
 TORCH_GLIBC_VERSION: dict[str, str] = {
-    "2.4": "2_17",
-    "2.5": "2_17",
-    "2.6": "2_24",
-    "2.7": "2_24",
     "2.8": "2_24",
     "2.9": "2_24",
     "2.10": "2_24",
     "2.11": "2_24",
+    "2.12": "2_28",
 }
 
 AUDITWHEEL_BLANKET_EXCLUDES = [
@@ -245,7 +230,7 @@ def main() -> None:
 
     # For PR builds, limit matrix to a single entry for faster CI.
     if os.environ.get("LIMIT_MATRIX") == "1":
-        rows = rows[:1]
+        rows = rows[-1:]
     print(json.dumps(rows))
 
 
