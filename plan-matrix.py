@@ -17,8 +17,8 @@ MIN_CUDA_VERSION = "12.8"
 # The architectures to build against.
 # SageAttention3 requires PyTorch >= 2.8.
 ARCH_TORCH_PAIRS = {
-    "x86_64": ["2.8.0", "2.9.1", "2.10.0", "2.11.0", "2.12.1"],
-    "aarch64": ["2.8.0", "2.9.1", "2.10.0", "2.11.0", "2.12.1"],
+    "x86_64": ["2.8.0", "2.9.1", "2.10.0", "2.11.0", "2.12.1", "2.13.0"],
+    "aarch64": ["2.8.0", "2.9.1", "2.10.0", "2.11.0", "2.12.1", "2.13.0"],
 }
 
 # Supported Python versions for each PyTorch version.
@@ -29,6 +29,7 @@ TORCH_PYTHON_SUPPORT = {
     "2.10": ["3.13", "3.14"],
     "2.11": ["3.13", "3.14"],
     "2.12": ["3.13", "3.14"],
+    "2.13": ["3.13", "3.14", "3.15"],
 }
 
 # Minimum and maximum CUDA versions for each PyTorch version.
@@ -39,6 +40,7 @@ PYTORCH_CUDA_RANGES: dict[str, tuple[str, str]] = {
     "2.10": ("12.6", "13.0"),
     "2.11": ("12.6", "13.0"),
     "2.12": ("12.6", "13.2"),
+    "2.13": ("12.6", "13.2"),
 }
 
 # Actual CUDA versions to build against for each PyTorch version.
@@ -54,6 +56,8 @@ PYTORCH_CUDA_VERSIONS: dict[tuple[str, str], list[str]] = {
     ("2.11", "aarch64"): ["12.6", "12.8", "12.9", "13.0"],
     ("2.12", "x86_64"): ["12.6", "13.0", "13.2"],
     ("2.12", "aarch64"): ["12.6", "13.0", "13.2"],
+    ("2.13", "x86_64"): ["12.6", "13.0", "13.2"],
+    ("2.13", "aarch64"): ["12.6", "13.0", "13.2"],
 }
 
 # CUDA architectures to build against for each PyTorch version.
@@ -73,6 +77,8 @@ TORCH_CUDA_ARCH_LIST = {
     ("2.11", "13.0"): "10.0;12.0+PTX",
     ("2.12", "13.0"): "10.0;12.0+PTX",
     ("2.12", "13.2"): "10.0;12.0+PTX",
+    ("2.13", "13.0"): "10.0;12.0+PTX",
+    ("2.13", "13.2"): "10.0;12.0+PTX",
 }
 
 # The glibc version to use for each PyTorch version, for manylinux builds.
@@ -83,6 +89,7 @@ TORCH_GLIBC_VERSION: dict[str, str] = {
     "2.10": "2_24",
     "2.11": "2_24",
     "2.12": "2_28",
+    "2.13": "2_28",
 }
 
 AUDITWHEEL_BLANKET_EXCLUDES = [
