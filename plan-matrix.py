@@ -56,24 +56,8 @@ PYTORCH_CUDA_VERSIONS: dict[tuple[str, str], list[str]] = {
     ("2.12", "aarch64"): ["12.6", "13.0", "13.2"],
 }
 
-# CUDA architectures to build against for each PyTorch version.
-TORCH_CUDA_ARCH_LIST = {
-    # https://github.com/pytorch/pytorch/blob/ba56102387ef21a3b04b357e5b183d48f0afefc7/.ci/manywheel/build_cuda.sh#L56
-    ("2.8", "12.8"): "10.0;12.0+PTX",
-    ("2.8", "12.9"): "10.0;12.0+PTX",
-    # https://github.com/pytorch/pytorch/blob/0fabc3ba44823f257e70ce397d989c8de5e362c1/.ci/manywheel/build_cuda.sh#L56
-    ("2.9", "12.8"): "10.0;12.0+PTX",
-    ("2.9", "12.9"): "10.0;12.0+PTX",
-    ("2.9", "13.0"): "10.0;12.0+PTX",
-    ("2.10", "12.8"): "10.0;12.0+PTX",
-    ("2.10", "12.9"): "10.0;12.0+PTX",
-    ("2.10", "13.0"): "10.0;12.0+PTX",
-    ("2.11", "12.8"): "10.0;12.0+PTX",
-    ("2.11", "12.9"): "10.0;12.0+PTX",
-    ("2.11", "13.0"): "10.0;12.0+PTX",
-    ("2.12", "13.0"): "10.0;12.0+PTX",
-    ("2.12", "13.2"): "10.0;12.0+PTX",
-}
+# SageAttention3's FP4 attention kernel requires Blackwell SM120 or newer.
+TORCH_CUDA_ARCH_LIST = "12.0+PTX"
 
 # The glibc version to use for each PyTorch version, for manylinux builds.
 # See: https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix
@@ -140,36 +124,33 @@ def main() -> None:
             torch_version_parsed = Version(torch_version)
             torch_x_y = f"{torch_version_parsed.major}.{torch_version_parsed.minor}"
 
-            # We only need to build against a single Python version, since SageAttention3
-            # builds against the stable ABI.
-            python_version = TORCH_PYTHON_SUPPORT[torch_x_y][-1]
-
             cuda_versions = PYTORCH_CUDA_VERSIONS[(torch_x_y, target_arch)]
-            for cuda_version in cuda_versions:
-                cuda_version_parsed = Version(cuda_version)
+            for python_version in TORCH_PYTHON_SUPPORT[torch_x_y]:
+                for cuda_version in cuda_versions:
+                    cuda_version_parsed = Version(cuda_version)
 
-                if cuda_version_parsed < Version(MIN_CUDA_VERSION):
-                    continue
+                    if cuda_version_parsed < Version(MIN_CUDA_VERSION):
+                        continue
 
-                # The CXX11 ABI became the default in PyTorch 2.7.0, but was also used in
-                # PyTorch 2.6.0 (but _only_ for the CUDA 12.6 builds).
-                #
-                # See: https://pytorch.org/blog/pytorch2-6/
-                cxx11_abi = torch_version_parsed >= Version("2.7.0") or (
-                    torch_version_parsed == Version("2.6.0")
-                    and cuda_version_parsed >= Version("12.6")
-                )
+                    # The CXX11 ABI became the default in PyTorch 2.7.0, but was also
+                    # used in PyTorch 2.6.0 for the CUDA 12.6 builds.
+                    #
+                    # See: https://pytorch.org/blog/pytorch2-6/
+                    cxx11_abi = torch_version_parsed >= Version("2.7.0") or (
+                        torch_version_parsed == Version("2.6.0")
+                        and cuda_version_parsed >= Version("12.6")
+                    )
 
-                row = {
-                    "target-arch": target_arch,
-                    "torch-version": str(torch_version_parsed),
-                    "python-version": python_version,
-                    "cuda-version": cuda_version,
-                    "cxx11-abi": "TRUE" if cxx11_abi else "FALSE",
-                }
+                    row = {
+                        "target-arch": target_arch,
+                        "torch-version": str(torch_version_parsed),
+                        "python-version": python_version,
+                        "cuda-version": cuda_version,
+                        "cxx11-abi": "TRUE" if cxx11_abi else "FALSE",
+                    }
 
-                if row not in EXCLUSIONS:
-                    rows.append(row)
+                    if row not in EXCLUSIONS:
+                        rows.append(row)
 
     # Transform each row to add various nice-to-have representations of fields.
     for row in rows:
@@ -213,12 +194,7 @@ def main() -> None:
             f"--exclude {lib}" for lib in auditwheel_excludes
         )
 
-        row["TORCH_CUDA_ARCH_LIST"] = TORCH_CUDA_ARCH_LIST[
-            (
-                f"{torch_version.major}.{torch_version.minor}",
-                f"{cuda_version.major}.{cuda_version.minor}",
-            )
-        ]
+        row["TORCH_CUDA_ARCH_LIST"] = TORCH_CUDA_ARCH_LIST
 
         # RUNNER: the GitHub Actions runner to use.
         if row["target-arch"] == "x86_64":
