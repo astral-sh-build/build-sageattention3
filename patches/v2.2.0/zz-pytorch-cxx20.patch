@@ -1,0 +1,29 @@
+--- a/sageattention3_blackwell/setup.py
++++ b/sageattention3_blackwell/setup.py
+@@ -129,7 +129,7 @@
+     nvcc_flags = [
+         "-O3",
+         # "-O0",
+-        "-std=c++17",
++        ("-std=c++20" if tuple(map(int, torch.__version__.split(".")[:2])) >= (2, 13) else "-std=c++17"),
+         "-U__CUDA_NO_HALF_OPERATORS__",
+         "-U__CUDA_NO_HALF_CONVERSIONS__",
+         "-U__CUDA_NO_BFLOAT16_OPERATORS__",
+@@ -160,7 +160,7 @@
+             name="fp4attn_cuda",
+             sources=["sageattn3/blackwell/api.cu"],
+             extra_compile_args={
+-                "cxx": ["-O3", "-std=c++17"],
++                "cxx": ["-O3", ("-std=c++20" if tuple(map(int, torch.__version__.split(".")[:2])) >= (2, 13) else "-std=c++17")],
+                 "nvcc": append_nvcc_threads(
+                     nvcc_flags + ["-DEXECMODE=0"] + cc_flag
+                 ),
+@@ -173,7 +173,7 @@
+             name="fp4quant_cuda",
+             sources=["sageattn3/quantization/fp4_quantization_4d.cu"],
+             extra_compile_args={
+-                "cxx": ["-O3", "-std=c++17"],
++                "cxx": ["-O3", ("-std=c++20" if tuple(map(int, torch.__version__.split(".")[:2])) >= (2, 13) else "-std=c++17")],
+                 "nvcc": append_nvcc_threads(
+                     nvcc_flags + ["-DEXECMODE=0"] + cc_flag
+                 ),
